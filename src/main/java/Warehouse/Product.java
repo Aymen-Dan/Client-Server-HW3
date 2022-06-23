@@ -1,7 +1,5 @@
 package Warehouse;
 
-import java.util.ArrayList;
-
 public class Product {
 
     public String name;//name of product
@@ -9,13 +7,40 @@ public class Product {
     public int price;//price of the product
     public int amount;//amount of the product stored
 
+    /** constructor with name only*/
+    public Product(String name){
+        this.name = name;
+    }
 
-    /** constructor */
+    /** constructor with values*/
     public Product(String name, String description, int price, int amount){
         this.name = name;
         this.description = description;
         this.price = price;
         this.amount = amount;
 
+    }
+
+    public String getDescription(){
+
+        return description;
+    }
+    public void setDescription(String description){
+        this.description = description;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+    public void setPrice(){
+        this.price = price;
+    }
+
+    public void addProduct(int amount) {
+        this.amount += amount;
+    }
+
+    public int getAmount(){
+        return amount;
     }
 }

@@ -23,7 +23,7 @@ public class Group {
 
     boolean addProduct(Product product) {
 
-        return product.add(product);
+        return products.add(product);
     }
 
 
