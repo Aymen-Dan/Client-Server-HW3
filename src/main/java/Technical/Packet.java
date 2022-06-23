@@ -55,6 +55,7 @@ public class Packet {
         wCRC16_2 = byteBuffer.getShort();
     }
 
+
     public byte[] toPacket() {
 
         Message message = getBMsq();

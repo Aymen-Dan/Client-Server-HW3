@@ -2,17 +2,19 @@ import Processing.Processor;
 import Processing.usableNetwork;
 import Technical.Message;
 import Technical.Packet;
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class Test {
+class TestTest {
 
     /**check encryption*/
-
+@Test
     void test0() {
         Message message = new Message(1, 1, new String("checkencryption"));
 
@@ -30,7 +32,8 @@ public class Test {
     }
 
 
-
+    /**test de-ecnryption for packet2*/
+    @Test
     void test1() throws Exception {
 
         Message message = new Message(1, 1, "kpkklkklgkdlvaookra[nj");
@@ -43,8 +46,8 @@ public class Test {
         assert (Arrays.equals(packBytes, packFirstBytes));
     }
 
-    //check packet description
-
+    /**check packet description*/
+    @Test
     void test2() throws Exception {
 
         Message message = new Message(1, 1, "descriptioneeee");
@@ -61,8 +64,8 @@ public class Test {
         assert (Arrays.equals(messageToBytes, decoded_messageToBytes));
     }
 
-
-        void finalTest() {
+    @Test
+    void finalTest() {
         ExecutorService executorService = Executors.newFixedThreadPool(12);
         for (int i = 0; i < 24; i++) {
             executorService.submit(() -> {
