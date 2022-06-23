@@ -17,7 +17,7 @@ public class Group {
     public Group (String name, String description)  {
         this.name = name;
         this.description = description;
-        products = new ArrayList<Product>(7);
+        products = new ArrayList<>(7);
     }
 
     /**add product to product list */

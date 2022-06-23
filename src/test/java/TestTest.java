@@ -16,7 +16,7 @@ class TestTest {
     /**check encryption*/
 @Test
     void test0() {
-        Message message = new Message(1, 1, new String("checkencryption"));
+        Message message = new Message(1, 1, "checkencryption");
 
         Packet packet = new Packet((byte) 1, (long) 4, message);
         byte[] encodedPacket = packet.toPacket();

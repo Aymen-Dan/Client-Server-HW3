@@ -31,7 +31,6 @@ public class Generator {
 
         Packet packet = new Packet((byte)1, bPaketID, testMessage);
 
-        byte[] packetToBytes = packet.toPacket();
-        return packetToBytes;
+        return packet.toPacket();
     }
 }

@@ -30,7 +30,7 @@ public class Product {
     public int getPrice() {
         return price;
     }
-    public void setPrice(){
+    public void setPrice(int price){
         this.price = price;
     }
 

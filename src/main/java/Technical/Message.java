@@ -36,7 +36,7 @@ public class Message {
         return message.length();
     }
 
-    public Integer getbUserId() {
+    public Integer getBUserId() {
         return bUserId;
     }
 

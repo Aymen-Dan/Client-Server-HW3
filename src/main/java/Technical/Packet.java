@@ -15,7 +15,7 @@ public class Packet {
     Short wCRC16_1;
     Short wCRC16_2;
 
-    public Long getbPaketID() {
+    public Long getBPaketID() {
         return bPaketID;
     }
 
@@ -61,7 +61,7 @@ public class Packet {
 
         message.encode();
 
-        Integer BgngLength = bMagic.BYTES + bSource.BYTES + Long.BYTES + wLength.BYTES;//first length
+        int BgngLength = Byte.BYTES + Byte.BYTES + Long.BYTES + Integer.BYTES;//first length
 
         byte[] Bgng = ByteBuffer.allocate(BgngLength)
                 .put(bMagic)
@@ -72,7 +72,7 @@ public class Packet {
 
         wCRC16_1 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Bgng);//16-1
 
-        Integer ScndLength = message.getMessageBytesLength();//second length
+        int ScndLength = message.getMessageBytesLength();//second length
 
         byte[] Scnd = ByteBuffer.allocate(ScndLength)
                 .put(message.toPacketPart())
@@ -80,7 +80,7 @@ public class Packet {
 
         wCRC16_2 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Scnd);//16-2
 
-        Integer packetLength = BgngLength + wCRC16_1.BYTES + ScndLength + wCRC16_2.BYTES;
+        int packetLength = BgngLength + Short.BYTES + ScndLength + Short.BYTES;
 //finally, returning
         return ByteBuffer.allocate(packetLength).put(Bgng).putShort(wCRC16_1).put(Scnd).putShort(wCRC16_2).array();
     }

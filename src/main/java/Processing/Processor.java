@@ -7,8 +7,8 @@ import java.util.concurrent.Executors;
 
 
 public class Processor implements Runnable{
-    private static ExecutorService service = Executors.newFixedThreadPool(5);
-    private Packet packet;
+    private static final ExecutorService service = Executors.newFixedThreadPool(5);
+    private final Packet packet;
     private Sender PackResponse;
 
     public Processor(Packet packet){
@@ -28,10 +28,8 @@ public class Processor implements Runnable{
 
         try {
             Thread.sleep(3000);
-            new UsableNetwork().sendMessage(PackResponse.packResponse(packet));
+            new UsableNetwork().sendMessage(Sender.packResponse(packet));
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
