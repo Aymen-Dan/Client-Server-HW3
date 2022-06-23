@@ -8,7 +8,6 @@ public class Warehouse {
 
     public Warehouse(){
         groups = new ArrayList<>(2);
-
     }
 
 }
