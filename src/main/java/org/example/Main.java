@@ -29,7 +29,5 @@ public class Main {
            e.printStackTrace();
         }
         Processor.shutdown();
-        System.out.println("End of main");
-
     }
 }
