@@ -15,9 +15,13 @@ public class Packet {
     Short wCRC16_1;
     Short wCRC16_2;
 
-    public Packet(Byte bSrc, Long bPktId, Message bMsq) {
-        this.bSource = bSrc;
-        this.bPaketID = bPktId;
+    public Long getbPaketID() {
+        return bPaketID;
+    }
+
+    public Packet(Byte bSource, Long bPaketID, Message bMsq) {
+        this.bSource = bSource;
+        this.bPaketID = bPaketID;
         this.bMsq = bMsq;
         wLength = bMsq.getMessage().length();
     }
@@ -28,7 +32,7 @@ public class Packet {
         Byte expectedBMagic = byteBuffer.get();
         System.out.println(bMagic);
         if (!expectedBMagic.equals(bMagic))
-            throw new Exception("First byte is incorrect!");
+            throw new Exception("First byte is wrong!");
 
         bSource = byteBuffer.get();
         bPaketID = byteBuffer.getLong();
@@ -55,7 +59,7 @@ public class Packet {
 
         message.encode();
 
-        Integer BgngLength = bMagic.BYTES + bSource.BYTES + Long.BYTES + wLength.BYTES;
+        Integer BgngLength = bMagic.BYTES + bSource.BYTES + Long.BYTES + wLength.BYTES;//first length
 
         byte[] Bgng = ByteBuffer.allocate(BgngLength)
                 .put(bMagic)
@@ -64,23 +68,21 @@ public class Packet {
                 .putInt(wLength)
                 .array();
 
-        wCRC16_1 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Bgng);
+        wCRC16_1 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Bgng);//16-1
 
-        Integer ScndLength = message.getMessageBytesLength();
+        Integer ScndLength = message.getMessageBytesLength();//second length
 
         byte[] Scnd = ByteBuffer.allocate(ScndLength)
                 .put(message.toPacketPart())
                 .array();
 
-        wCRC16_2 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Scnd);
+        wCRC16_2 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Scnd);//16-2
 
         Integer packetLength = BgngLength + wCRC16_1.BYTES + ScndLength + wCRC16_2.BYTES;
-
+//finally, returning
         return ByteBuffer.allocate(packetLength).put(Bgng).putShort(wCRC16_1).put(Scnd).putShort(wCRC16_2).array();
     }
 
-    public Long getbPaketID() {
-        return bPaketID;
-    }
+
 
 }
