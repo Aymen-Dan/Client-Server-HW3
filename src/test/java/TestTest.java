@@ -1,5 +1,5 @@
 import Processing.Processor;
-import Processing.usableNetwork;
+import Processing.UsableNetwork;
 import Technical.Message;
 import Technical.Packet;
 import org.junit.jupiter.api.Test;
@@ -69,7 +69,7 @@ class TestTest {
         ExecutorService executorService = Executors.newFixedThreadPool(12);
         for (int i = 0; i < 24; i++) {
             executorService.submit(() -> {
-                usableNetwork tcp = new usableNetwork();
+                UsableNetwork tcp = new UsableNetwork();
                 tcp.receiveMessage();
             });
         }

@@ -5,7 +5,7 @@ import Technical.Message;
 import Technical.Packet;
 
 
-public class usableNetwork implements Network{
+public class UsableNetwork implements Network{
 
         @Override
         public void receiveMessage() {
