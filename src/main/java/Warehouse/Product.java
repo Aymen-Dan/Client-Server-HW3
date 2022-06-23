@@ -18,7 +18,6 @@ public class Product {
         this.description = description;
         this.price = price;
         this.amount = amount;
-
     }
 
     public String getDescription(){
@@ -36,11 +35,14 @@ public class Product {
         this.price = price;
     }
 
-    public void addProduct(int amount) {
-        this.amount += amount;
+    public void setAmount(int amount){
+        this.amount = amount;
     }
-
     public int getAmount(){
         return amount;
+    }
+
+    public void addAmount(int amount) {
+        this.amount += amount;
     }
 }
