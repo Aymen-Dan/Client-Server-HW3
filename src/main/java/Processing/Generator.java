@@ -18,8 +18,8 @@ enum cTypes {
 }
 
 /**the actual receiver*/
-public class Receiver {
-    public static byte[] receive() {
+public class Generator {
+    public static byte[] generateMessage() {
         Random random = new Random();
 
         int command = random.nextInt(cTypes.values().length);//random command
