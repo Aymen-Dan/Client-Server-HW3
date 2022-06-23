@@ -19,6 +19,7 @@ public class Packet {
         return bPaketID;
     }
 
+    /**constructing packet*/
     public Packet(Byte bSource, Long bPaketID, Message bMsq) {
         this.bSource = bSource;
         this.bPaketID = bPaketID;
@@ -37,18 +38,19 @@ public class Packet {
         bSource = byteBuffer.get();
         bPaketID = byteBuffer.getLong();
         wLength = byteBuffer.getInt();
-
         wCRC16_1 = byteBuffer.getShort();
 
+        //bmsq
         bMsq = new Message();
         bMsq.setCType(byteBuffer.getInt());
         bMsq.setBUserId(byteBuffer.getInt());
 
+        //msg body
         byte[] messageBody = new byte[wLength];
         byteBuffer.get(messageBody);
 
         bMsq.setMessage(new String(messageBody));
-        bMsq.decode();
+        bMsq.decode();//decode
 
         wCRC16_2 = byteBuffer.getShort();
     }
