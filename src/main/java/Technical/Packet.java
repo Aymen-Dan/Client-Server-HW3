@@ -18,7 +18,6 @@ public class Packet {
     public Packet(Byte bSrc, Long bPktId, Message bMsq) {
         this.bSource = bSrc;
         this.bPaketID = bPktId;
-
         this.bMsq = bMsq;
         wLength = bMsq.getMessage().length();
     }
@@ -29,7 +28,7 @@ public class Packet {
         Byte expectedBMagic = byteBuffer.get();
         System.out.println(bMagic);
         if (!expectedBMagic.equals(bMagic))
-            throw new Exception("Incorrect first byte");
+            throw new Exception("First byte is incorrect!");
 
         bSource = byteBuffer.get();
         bPaketID = byteBuffer.getLong();
@@ -40,8 +39,10 @@ public class Packet {
         bMsq = new Message();
         bMsq.setCType(byteBuffer.getInt());
         bMsq.setBUserId(byteBuffer.getInt());
+
         byte[] messageBody = new byte[wLength];
         byteBuffer.get(messageBody);
+
         bMsq.setMessage(new String(messageBody));
         bMsq.decode();
 
@@ -49,30 +50,33 @@ public class Packet {
     }
 
     public byte[] toPacket() {
+
         Message message = getBMsq();
 
         message.encode();
 
-        Integer packetPartFirstLength = bMagic.BYTES + bSource.BYTES + Long.BYTES + wLength.BYTES;
-        byte[] packetPartFirst = ByteBuffer.allocate(packetPartFirstLength)
+        Integer BgngLength = bMagic.BYTES + bSource.BYTES + Long.BYTES + wLength.BYTES;
+
+        byte[] Bgng = ByteBuffer.allocate(BgngLength)
                 .put(bMagic)
                 .put(bSource)
                 .putLong(bPaketID)
                 .putInt(wLength)
                 .array();
 
-        wCRC16_1 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, packetPartFirst);
+        wCRC16_1 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Bgng);
 
-        Integer packetPartSecondLength = message.getMessageBytesLength();
-        byte[] packetPartSecond = ByteBuffer.allocate(packetPartSecondLength)
+        Integer ScndLength = message.getMessageBytesLength();
+
+        byte[] Scnd = ByteBuffer.allocate(ScndLength)
                 .put(message.toPacketPart())
                 .array();
 
-        wCRC16_2 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, packetPartSecond);
+        wCRC16_2 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Scnd);
 
-        Integer packetLength = packetPartFirstLength + wCRC16_1.BYTES + packetPartSecondLength + wCRC16_2.BYTES;
+        Integer packetLength = BgngLength + wCRC16_1.BYTES + ScndLength + wCRC16_2.BYTES;
 
-        return ByteBuffer.allocate(packetLength).put(packetPartFirst).putShort(wCRC16_1).put(packetPartSecond).putShort(wCRC16_2).array();
+        return ByteBuffer.allocate(packetLength).put(Bgng).putShort(wCRC16_1).put(Scnd).putShort(wCRC16_2).array();
     }
 
     public Long getbPaketID() {
