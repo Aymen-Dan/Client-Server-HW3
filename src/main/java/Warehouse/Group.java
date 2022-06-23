@@ -20,9 +20,8 @@ public class Group {
         products = new ArrayList<Product>(7);
     }
 
-
+    /**add product to product list */
     boolean addProduct(Product product) {
-
         return products.add(product);
     }
 
