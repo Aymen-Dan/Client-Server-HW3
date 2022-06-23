@@ -29,10 +29,10 @@ public class Packet {
 
     public Packet(byte[] bytes) throws Exception {
         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-
-        Byte expectedBMagic = byteBuffer.get();
-        if (!expectedBMagic.equals(bMagic))
+        Byte eBMagic = byteBuffer.get();
+        if (!eBMagic.equals(bMagic)) {
             throw new Exception("First byte is wrong!");
+        }
 
         bSource = byteBuffer.get();
         bPaketID = byteBuffer.getLong();

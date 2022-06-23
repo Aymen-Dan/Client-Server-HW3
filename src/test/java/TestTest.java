@@ -32,19 +32,7 @@ class TestTest {
     }
 
 
-    /**test de-ecnryption for packet2*/
-    @Test
-    void test1() throws Exception {
 
-        Message message = new Message(1, 1, "kpkklkklgkdlvaookra[nj");
-        Packet packet = new Packet((byte) 1, (long) 1111, message);
-
-        byte[] packBytes = packet.toPacket();
-        Packet packetFirst = new Packet(packBytes);//first packet
-
-        byte[] packFirstBytes = packetFirst.toPacket();//bytes
-        assert (Arrays.equals(packBytes, packFirstBytes));
-    }
 
     /**check packet description*/
     @Test
@@ -66,8 +54,10 @@ class TestTest {
 
     @Test
     void finalTest() {
-        ExecutorService executorService = Executors.newFixedThreadPool(12);
-        for (int i = 0; i < 24; i++) {
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        for (int i = 0; i < 20; i++) {
+
+            //execute
             executorService.submit(() -> {
                 UsableNetwork tcp = new UsableNetwork();
                 tcp.receiveMessage();
