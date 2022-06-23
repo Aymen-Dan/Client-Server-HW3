@@ -21,8 +21,8 @@ public class usableNetwork implements Network{
             try {
                 Packet packet = new Packet(message);
                 Message message1 = packet.getBMsq();
-                System.out.println("\n______________\n#" + Thread.currentThread().getId() + " Send respond to user: "
-                        +  packet.getBMsq().getMessage() + "\nCommand: " + cTypes.values()[message1.getCType()]  + "\n______________");
+                System.out.println("\nCurrent ID: " + Thread.currentThread().getId() + ";\nResponse sent to user: "
+                        +  packet.getBMsq().getMessage() + "; \nThe command: " + cTypes.values()[message1.getCType()]+"\n");
             } catch (Exception e) {
                 e.printStackTrace();
             }
