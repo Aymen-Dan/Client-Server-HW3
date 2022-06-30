@@ -1,4 +1,4 @@
-package Technical;
+package Base;
 
 
 import lombok.Data;

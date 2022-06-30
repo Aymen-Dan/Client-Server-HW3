@@ -1,7 +1,4 @@
-package Technical;
-
-import Technical.Message;
-import Technical.Packet;
+package Base;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;

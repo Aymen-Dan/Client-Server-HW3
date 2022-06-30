@@ -1,8 +1,8 @@
-package Processing;
+package TCP_Network;
 
 
-import Technical.Crc_16;
-import Technical.Packet;
+import Base.Crc_16;
+import Base.Packet;
 
 import java.io.IOException;
 import java.io.InputStream;

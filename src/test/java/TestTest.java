@@ -1,5 +1,5 @@
-import Technical.Processor;
-import Technical.Message;
+import Base.Processor;
+import Base.Message;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

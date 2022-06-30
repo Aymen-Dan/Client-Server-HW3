@@ -1,7 +1,9 @@
-package Processing;
+package TCP_Network;
 
 // Client Side
-import Technical.Packet;
+import Base.Packet;
+import Technical.ServerDownException;
+import Technical.ServerOverloadException;
 
 import javax.crypto.BadPaddingException;
 import java.io.*;
