@@ -22,19 +22,19 @@ public class ClientHandler implements Runnable {
 
     private AtomicInteger processingAmount = new AtomicInteger(0);
 
-    public ClientHandler(Socket clientSocket, ThreadPoolExecutor executor, int maxTimeout) throws IOException {
-        network = new Network(clientSocket, maxTimeout);
+    public ClientHandler(Socket clientSocket, ThreadPoolExecutor executor, int maxNumOfTimeout) throws IOException {
+        network = new Network(clientSocket, maxNumOfTimeout);
         this.executor = executor;
     }
 
     @Override
     public void run() {
-        Thread.currentThread().setName(Thread.currentThread().getName() + " - ClientHandler");
+        Thread.currentThread().setName("Client Handler: " + Thread.currentThread().getName());
         try {
             Packet helloPacket = null;
             try {
                 helloPacket = new Packet((byte) 0, 0L,
-                        new Message(Message.cTypes.RESPONSE, 0, "connection established"));
+                        new Message(Message.cTypes.RESPONSE, 0, "Connection established"));
             } catch (BadPaddingException e) {
                 e.printStackTrace();
             } catch (IllegalBlockSizeException e) {
@@ -45,7 +45,7 @@ public class ClientHandler implements Runnable {
             while (true) {
                 byte[] packetBytes = network.receive();
                 if (packetBytes == null) {
-                    System.out.println("client timeout");
+                    System.out.println("Client timeout!");
                     break;
                 }
                 handlePacketBytes(Arrays.copyOf(packetBytes, packetBytes.length));
@@ -56,6 +56,18 @@ public class ClientHandler implements Runnable {
         } finally {
             shutdown();
         }
+    }
+
+
+    public void shutdown() {
+        while (processingAmount.get() > 0) {
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        network.shutdown();
     }
 
     private void handlePacketBytes(byte[] packetBytes) {
@@ -79,13 +91,11 @@ public class ClientHandler implements Runnable {
                         answerPacket = Processor.process(inputPacket);
                     } catch (BadPaddingException e) {
                         e.printStackTrace();
-                        System.err.println("BadPaddingException");
-                    } catch (IllegalBlockSizeException e) {
-                        e.printStackTrace();
-                        System.err.println("IllegalBlockSizeException");
+
                     } catch (NullPointerException e) {
                         e.printStackTrace();
-                        System.err.println("NullPointerException");
+                    } catch (IllegalBlockSizeException e) {
+                        e.printStackTrace();
                     }
 
                     try {
@@ -106,16 +116,6 @@ public class ClientHandler implements Runnable {
     }
 
 
-    public void shutdown() {
-        while (processingAmount.get() > 0) {
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        network.shutdown();
-    }
 
 
 }

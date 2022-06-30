@@ -1,10 +1,10 @@
 package UDP_Network;
 
-public class ClientMapCleaner extends Thread {
+public class MapCleaner extends Thread {
 
     public boolean isActive = true;
 
-    ClientMapCleaner() {
+    MapCleaner() {
         this.start();
     }
 

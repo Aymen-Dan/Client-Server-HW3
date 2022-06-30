@@ -32,6 +32,16 @@ public class StoreClientUDP extends Thread {
         this.start();
     }
 
+    public Packet getAnswerPacket() throws InterruptedException {
+        while (true) {
+            if (answerPacket != null) {
+                break;
+            }
+            this.sleep(1);
+        }
+        return answerPacket;
+    }
+
     @Override
     public void run() {
 
@@ -92,18 +102,10 @@ public class StoreClientUDP extends Thread {
             }
 
             if (answerPacket.getbPktId().compareTo(packet.getbPktId()) == 0) received = true;
-            System.out.println("Message from server : " + answerPacket.getBMsq().getMessage() + " ; Packet id : " + answerPacket.getbPktId());
+            System.out.println("Message from server : " + answerPacket.getBMsq().getMessage() + ";\nPacket ID : " + answerPacket.getbPktId());
         }
     }
 
-    public Packet getAnswerPacket() throws InterruptedException {
-        while (true) {
-            if (answerPacket != null) {
-                break;
-            }
-            this.sleep(1);
-        }
-        return answerPacket;
-    }
+
 
 }

@@ -12,10 +12,10 @@ public class StoreServerTCP extends Thread {
 
     public ServerSocket server;
 
-    private int port;
-    private ThreadPoolExecutor connectionPool;
-    private ThreadPoolExecutor processPool;
-    private int clientTimeout;
+    private final int port;
+    private final ThreadPoolExecutor connectionPool;
+    private final ThreadPoolExecutor processPool;
+    private final int clientTimeout;
 
     public StoreServerTCP(int port, int maxNumOfConnectionThreads, int maxNumOfProcessThreads, int maxNumOfClientTimeout)
             throws IOException {

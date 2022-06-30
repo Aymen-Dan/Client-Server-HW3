@@ -40,7 +40,7 @@ public class StoreServerUDP extends Thread {
     public void run() {
         System.out.println("Server running on port: " + listenPort);
 
-        ClientMapCleaner cmap = new ClientMapCleaner();
+        MapCleaner cmap = new MapCleaner();
 
         while (true) {
 
