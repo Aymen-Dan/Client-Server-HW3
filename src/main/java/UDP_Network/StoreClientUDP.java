@@ -9,13 +9,14 @@ import java.io.IOException;
 import java.net.*;
 
 public class StoreClientUDP extends Thread {
-    DatagramSocket ds = null;
-    DatagramPacket dp = null;
-    InetAddress ip = InetAddress.getLocalHost();
-    private int port;
-    private Packet packet;
+    DatagramSocket dtgrmSckt = null;
+    DatagramPacket dtgrmPckt = null;
+    InetAddress IP = InetAddress.getLocalHost();
+
+    private final int port;
+    private final Packet packet;
     private Packet answerPacket;
-    private byte[] packetBytes;
+
 
 
     public StoreClientUDP(int port, Packet packet) throws UnknownHostException {
@@ -23,8 +24,8 @@ public class StoreClientUDP extends Thread {
         this.packet = packet;
 
         try {
-            ds = new DatagramSocket();
-            ds.setSoTimeout(1500);
+            dtgrmSckt = new DatagramSocket();
+            dtgrmSckt.setSoTimeout(1500);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -33,11 +34,8 @@ public class StoreClientUDP extends Thread {
     }
 
     public Packet getAnswerPacket() throws InterruptedException {
-        while (true) {
-            if (answerPacket != null) {
-                break;
-            }
-            this.sleep(1);
+        while (answerPacket == null) {
+            sleep(1);
         }
         return answerPacket;
     }
@@ -51,22 +49,22 @@ public class StoreClientUDP extends Thread {
 
     private void sendAndReceive(Packet packet) {
 
-        if (ds.isClosed()) {
+        if (dtgrmSckt.isClosed()) {
             try {
-                ds = new DatagramSocket();
-                ds.setSoTimeout(1500);
+                dtgrmSckt = new DatagramSocket();
+                dtgrmSckt.setSoTimeout(1500);
             } catch (SocketException e) {
                 e.printStackTrace();
             }
         }
 
 
-        packetBytes = packet.toPacket();
-        dp = new DatagramPacket(packetBytes, packetBytes.length, ip, port);
+        byte[] packetBytes = packet.toPacket();
+        dtgrmPckt = new DatagramPacket(packetBytes, packetBytes.length, IP, port);
         boolean received = false;
 
         try {
-            ds.send(dp);
+            dtgrmSckt.send(dtgrmPckt);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -77,15 +75,16 @@ public class StoreClientUDP extends Thread {
             DatagramPacket incomingDatagramPacket = new DatagramPacket(buff, buff.length);
 
             try {
-                ds.receive(incomingDatagramPacket);
+                dtgrmSckt.receive(incomingDatagramPacket);
             } catch (IOException e) {
                 if (received) {
                     System.out.println("Client Socket timed out!");
-                    ds.close();
+                    dtgrmSckt.close();
                     break;
+
                 } else {
-                    ds.close();
-                    System.out.println("resending packet (id : " + packet.getbPktId() + ") ..");
+                    dtgrmSckt.close();
+                    System.out.println("Resending packet. Packet ID: " + packet.getbPktId());
                     sendAndReceive(packet);
                     break;
                 }
@@ -95,12 +94,12 @@ public class StoreClientUDP extends Thread {
             try {
                 answerPacket = new Packet(incomingDatagramPacket.getData());
                 this.answerPacket = answerPacket;
-            } catch (BadPaddingException e) {
-                e.printStackTrace();
-            } catch (IllegalBlockSizeException e) {
+
+            } catch (BadPaddingException | IllegalBlockSizeException e) {
                 e.printStackTrace();
             }
 
+            assert answerPacket != null;
             if (answerPacket.getbPktId().compareTo(packet.getbPktId()) == 0) received = true;
             System.out.println("Message from server : " + answerPacket.getBMsq().getMessage() + ";\nPacket ID : " + answerPacket.getbPktId());
         }
