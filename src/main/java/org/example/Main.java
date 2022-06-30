@@ -13,7 +13,7 @@ import java.io.IOException;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Starting\n");
 
         int portTCP = 12345;
@@ -88,15 +88,15 @@ public class Main {
                 Packet pac4 = null;
 
                 try {
-                    pac0 = new Packet((byte) 1, UnsignedLong.ONE,
+                    pac0 = new Packet((byte) 1, 1L,
                             new Message(Message.cTypes.ADD_PRODUCT_GROUP, 0, "client 0"));
-                    pac1 = new Packet((byte) 1, UnsignedLong.ONE,
+                    pac1 = new Packet((byte) 1, 1L,
                             new Message(Message.cTypes.ADD_PRODUCT, 1, "client 1"));
-                    pac2 = new Packet((byte) 1, UnsignedLong.ONE,
+                    pac2 = new Packet((byte) 1, 1L,
                             new Message(Message.cTypes.GET_PRODUCT_AMOUNT, 2, "client 2"));
-                    pac3 = new Packet((byte) 1, UnsignedLong.ONE,
-                            new Message(Message.cTypes.ADD_PRODUCT_TITLE_TO_GROUP, 3, "client 3"));
-                    pac4 = new Packet((byte) 1, UnsignedLong.ONE,
+                    pac3 = new Packet((byte) 1, 1L,
+                            new Message(Message.cTypes.ADD_PRODUCT_TO_GROUP, 3, "client 3"));
+                    pac4 = new Packet((byte) 1, 1L,
                             new Message(Message.cTypes.SET_PRODUCT_PRICE, 4, "client 4"));
                 } catch (BadPaddingException e) {
                     e.printStackTrace();
@@ -109,8 +109,6 @@ public class Main {
                 StoreClientUDP sc0 = new StoreClientUDP(portUDP, pac0);
                 StoreClientUDP sc1 = new StoreClientUDP(portUDP, pac1);
                 StoreClientUDP sc2 = new StoreClientUDP(portUDP, pac2);
-                StoreClientUDP sc3 = new StoreClientUDP(portUDP, pac3);
-                StoreClientUDP sc4 = new StoreClientUDP(portUDP, pac4);
 
 
 

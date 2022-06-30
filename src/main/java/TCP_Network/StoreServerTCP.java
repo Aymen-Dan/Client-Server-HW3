@@ -12,20 +12,31 @@ public class StoreServerTCP extends Thread {
 
     public ServerSocket server;
 
-    private int                port;
+    private int port;
     private ThreadPoolExecutor connectionPool;
     private ThreadPoolExecutor processPool;
-    private int                clientTimeout;
+    private int clientTimeout;
 
-    public StoreServerTCP(int port, int maxConnectionThreads, int maxProcessThreads, int maxClientTimeout)
+    public StoreServerTCP(int port, int maxNumOfConnectionThreads, int maxNumOfProcessThreads, int maxNumOfClientTimeout)
             throws IOException {
         super("Server");
-        if (maxClientTimeout < 0) throw new IllegalArgumentException("timeout can't be negative");
+
+        //max timeout?
+        if (maxNumOfClientTimeout < 0) throw new IllegalArgumentException("Timeout can't be negative");
         this.port = port;
-        connectionPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxConnectionThreads);
-        processPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxProcessThreads);
-        this.clientTimeout = maxClientTimeout;
+         processPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxNumOfProcessThreads);
+         connectionPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(maxNumOfConnectionThreads);
+         //timeout
+        this.clientTimeout = maxNumOfClientTimeout;
         server = new ServerSocket(port);
+    }
+
+    public void shutdown() {
+        try {
+            server.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -40,7 +51,7 @@ public class StoreServerTCP extends Thread {
             }
 
         } catch (SocketException e) {
-            System.out.println("Closing the server");
+            System.out.println("Closing server");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -48,17 +59,11 @@ public class StoreServerTCP extends Thread {
         } finally {
             connectionPool.shutdown();
             processPool.shutdown();
-            System.out.println("Server has closed");
+            System.out.println("Server shutdown");
         }
 
     }
 
-    public void shutdown() {
-        try {
-            server.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 
 }

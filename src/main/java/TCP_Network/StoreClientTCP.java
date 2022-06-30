@@ -2,8 +2,8 @@ package TCP_Network;
 
 // Client Side
 import Base.Packet;
-import Technical.ServerDownException;
-import Technical.ServerOverloadException;
+import Technical.SrvrDownException;
+import Technical.SrvrOverloadException;
 
 import javax.crypto.BadPaddingException;
 import java.io.*;
@@ -12,11 +12,11 @@ import java.net.*;
 
 public class StoreClientTCP extends Thread {
 
-    private int     port;
+    private int port;
     private Network network;
-    private Packet  packet;
+    private Packet packet;
 
-    private int connectionTimeoutUnit = 500;
+    private int connectionTimeout = 500;
 
 
     public StoreClientTCP(int port, Packet packet) {
@@ -32,16 +32,17 @@ public class StoreClientTCP extends Thread {
                 Socket socket = new Socket("localhost", port);
                 network = new Network(socket, 3000);
                 return;
+
             } catch (ConnectException e) {
                 if (attempt > 3) {
-                    System.out.println(Thread.currentThread().getName() + " server is inactive");
-                    throw new ServerDownException();
+                   throw new SrvrDownException("The server is down!");
                 }
 
                 try {
-                    Thread.sleep(connectionTimeoutUnit + connectionTimeoutUnit * attempt);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
+                    Thread.sleep(connectionTimeout + connectionTimeout * attempt);
+
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
                 }
                 ++attempt;
             }
@@ -50,41 +51,44 @@ public class StoreClientTCP extends Thread {
 
     @Override
     public void run() {
-        Thread.currentThread().setName("Client " + Thread.currentThread().getId() + ":");
+        Thread.currentThread().setName("Client ID: " + Thread.currentThread().getId() + ";");
 
-        System.out.println(Thread.currentThread().getName() + " start");
+        System.out.println("\nStart thread "+Thread.currentThread().getName());
 
         try {
             try {
                 int attempt = 0;
                 while (true) {
 
-                    if (attempt == 3) throw new ServerOverloadException();
+
+                    if (attempt == 3) throw new SrvrOverloadException("The server is overloaded!");
 
                     connect();
 
-                    byte[] helloPacketBytes = network.receive();
-                    if (helloPacketBytes == null) {
-                        System.out.println(Thread.currentThread().getName() + " server timeout");
+                    byte[] firstPcktBytes = network.receive();
+
+
+                    if (firstPcktBytes == null) {
                         ++attempt;
                         continue;
                     }
-                    Packet helloPacket = new Packet(helloPacketBytes);
-                    System.out.println(Thread.currentThread().getName() + " answer from server: " +
-                            helloPacket.getBMsq().getMessage());
 
+                    Packet helloPckt = new Packet(firstPcktBytes);
+
+                    System.out.println("Received answer from server " +Thread.currentThread().getName() +": "+helloPckt.getBMsq().getMessage());
 
                     network.send(packet.toPacket());
 
-                    byte[] dataPacketBytes = network.receive();
-                    if (dataPacketBytes == null) {
-                        System.out.println(Thread.currentThread().getName() + " server timeout");
+                    byte[] dataPcktBytes = network.receive();
+                    if (dataPcktBytes == null) {
+                        System.out.println("Server timeout on thread "+Thread.currentThread().getName());
+
+
                         ++attempt;
                         continue;
                     }
-                    Packet dataPacket = new Packet(dataPacketBytes);
-                    System.out.println(Thread.currentThread().getName() + " answer from server: " +
-                            dataPacket.getBMsq().getMessage());
+                    Packet dataPacket = new Packet(dataPcktBytes);
+                    System.out.println("Received answer from server " +Thread.currentThread().getName() +": " + dataPacket.getBMsq().getMessage());
                     break;
                 }
             } catch (BadPaddingException e) {
@@ -97,7 +101,7 @@ public class StoreClientTCP extends Thread {
             if (network != null) {
                 network.shutdown();
             }
-            System.out.println(Thread.currentThread().getName() + " end");
+            System.out.println("END ON THREAD " + Thread.currentThread().getName());
         }
     }
 
