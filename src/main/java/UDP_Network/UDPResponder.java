@@ -4,6 +4,7 @@ package UDP_Network;
 import Base.Message;
 import Base.Packet;
 import Base.Processor;
+import com.google.common.primitives.UnsignedLong;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -36,7 +37,7 @@ public class UDPResponder implements Runnable {
             }
 
             assert pacToBeProcessed != null;
-            if(StoreServerUDP.packetCanBeProcessed(pacToBeProcessed.getBMsq().getBUserId(), pacToBeProcessed.getbPktId())) {
+            if(StoreServerUDP.packetCanBeProcessed(pacToBeProcessed.getBMsq().getBUserId(), UnsignedLong.valueOf(pacToBeProcessed.getbPktId()))) {
                 try {
                     answerPac = Processor.process(pacToBeProcessed);
                 } catch (BadPaddingException e) {
