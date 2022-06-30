@@ -48,14 +48,11 @@ public class Packet {
     }
 
 
-    public Packet(byte[] encodedPacket) /*throws Exception */throws BadPaddingException, IllegalBlockSizeException {
+    public Packet(byte[] encodedPacket) throws BadPaddingException, IllegalBlockSizeException {
 
         ByteBuffer buffer = ByteBuffer.wrap(encodedPacket);
 
         Byte expectedBMagic = buffer.get();
-
-//        if (!expectedBMagic.equals(B_MAGIC))
-//            throw new Exception("Unexpected bMagic");
 
 
         bSrc = buffer.get();

@@ -1,37 +1,106 @@
 package Processing;
 
 // Client Side
+import Technical.Packet;
+
+import javax.crypto.BadPaddingException;
 import java.io.*;
 import java.net.*;
 
-public class StoreClientTCP {
+
+public class StoreClientTCP extends Thread {
+
+    private int     port;
+    private Network network;
+    private Packet  packet;
+
+    private int connectionTimeoutUnit = 500;
+
+
+    public StoreClientTCP(int port, Packet packet) {
+        this.port = port;
+        this.packet = packet;
+    }
+
+    private void connect() throws IOException {
+        int attempt = 0;
+
+        while (true) {
+            try {
+                Socket socket = new Socket("localhost", port);
+                network = new Network(socket, 3000);
+                return;
+            } catch (ConnectException e) {
+                if (attempt > 3) {
+                    System.out.println(Thread.currentThread().getName() + " server is inactive");
+                    throw new ServerDownException();
+                }
+
+                try {
+                    Thread.sleep(connectionTimeoutUnit + connectionTimeoutUnit * attempt);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                ++attempt;
+            }
+        }
+    }
+
+    @Override
     public void run() {
+        Thread.currentThread().setName("Client " + Thread.currentThread().getId() + ":");
+
+        System.out.println(Thread.currentThread().getName() + " start");
+
         try {
-            //assume that the server is listening for connection request on port serverPort via TCP.
-            int serverPort = 4020;
-            InetAddress host = InetAddress.getByName("localhost");
-            System.out.println("Connecting to server on port " + serverPort);
+            try {
+                int attempt = 0;
+                while (true) {
 
-            UsableNetwork socket = new UsableNetwork(host,serverPort);
-            //Socket socket = new Socket("127.0.0.1", serverPort);
-            System.out.println("Just connected to a server!");
+                    if (attempt == 3) throw new ServerOverloadException();
 
-            /**When the client's request is accepted, the client creates an input stream to receive data from its socket and an output stream to send data to the socket at the server's end of the channel*/
+                    connect();
+
+                    byte[] helloPacketBytes = network.receive();
+                    if (helloPacketBytes == null) {
+                        System.out.println(Thread.currentThread().getName() + " server timeout");
+                        ++attempt;
+                        continue;
+                    }
+                    Packet helloPacket = new Packet(helloPacketBytes);
+                    System.out.println(Thread.currentThread().getName() + " answer from server: " +
+                            helloPacket.getBMsq().getMessage());
 
 
+                    network.send(packet.toPacket());
 
-            System.out.println("Client received: " + line + " from Server");
-            toServer.close();
-            fromServer.close();
-            socket.close();
+                    byte[] dataPacketBytes = network.receive();
+                    if (dataPacketBytes == null) {
+                        System.out.println(Thread.currentThread().getName() + " server timeout");
+                        ++attempt;
+                        continue;
+                    }
+                    Packet dataPacket = new Packet(dataPacketBytes);
+                    System.out.println(Thread.currentThread().getName() + " answer from server: " +
+                            dataPacket.getBMsq().getMessage());
+                    break;
+                }
+            } catch (BadPaddingException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } finally {
+            if (network != null) {
+                network.shutdown();
+            }
+            System.out.println(Thread.currentThread().getName() + " end");
         }
-        catch(UnknownHostException ex) {
-            ex.printStackTrace();
-        }
-        //throws an IOException if there is no connection
-        catch(IOException e){
-            e.printStackTrace();
-        }
+    }
+
+    public void shutdown() {
+        network.shutdown();
     }
 
 }
