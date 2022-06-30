@@ -1,57 +1,90 @@
 package Technical;
 
-import com.github.snksoft.crc.CRC;
-import lombok.Data;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import java.nio.ByteBuffer;
 
-@Data
 public class Packet {
-    public final static Byte bMagic = 0x13;
 
-    Byte bSource;
-    Long bPaketID;
-    Integer wLength;
+    public final static Byte B_MAGIC = 0x13;
+    public final static Integer HEADER_LENGTH = 16;
+    public final static Integer CRC16_LENGTH = 2;
+
+
+    Long bPktId;
+    Byte bSrc;
+    Integer wLen;
+    Short wCrc16_1;
     Message bMsq;
-    Short wCRC16_1;
-    Short wCRC16_2;
+    Short wCrc16_2;
 
-    public Long getBPaketID() {
-        return bPaketID;
+
+    public Message getBMsq() {
+        return bMsq;
     }
 
-    /**constructing packet*/
-    public Packet(Byte bSource, Long bPaketID, Message bMsq) {
-        this.bSource = bSource;
-        this.bPaketID = bPaketID;
+    public Byte getbSrc() {
+        return bSrc;
+    }
+
+    public void setbPktId(Long bPktId) {
+        this.bPktId = bPktId;
+    }
+
+    public Long getbPktId() {
+        return bPktId;
+    }
+
+    public final static Integer packetPartFirstLengthWithoutwLen = B_MAGIC.BYTES + Byte.BYTES + Long.BYTES;
+    public final static Integer packetPartFirstLength = packetPartFirstLengthWithoutwLen + Integer.BYTES;
+    public final static Integer packetPartFirstLengthWithCRC16 = packetPartFirstLength + Short.BYTES;
+
+
+    public Packet(Byte bSrc, Long bPktId, Message bMsq) {
+        this.bSrc = bSrc;
+        this.bPktId = bPktId;
         this.bMsq = bMsq;
-        wLength = bMsq.getMessage().length();
+        wLen = bMsq.fullMessageBytesLength();
     }
 
-    public Packet(byte[] bytes) throws Exception {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-        Byte eBMagic = byteBuffer.get();
-        if (!eBMagic.equals(bMagic)) {
-            throw new Exception("First byte is wrong!");
-        }
 
-        bSource = byteBuffer.get();
-        bPaketID = byteBuffer.getLong();
-        wLength = byteBuffer.getInt();
-        wCRC16_1 = byteBuffer.getShort();
+    public Packet(byte[] encodedPacket) /*throws Exception */throws BadPaddingException, IllegalBlockSizeException {
 
-        //bmsq
+        ByteBuffer buffer = ByteBuffer.wrap(encodedPacket);
+
+        Byte expectedBMagic = buffer.get();
+
+//        if (!expectedBMagic.equals(B_MAGIC))
+//            throw new Exception("Unexpected bMagic");
+
+
+        bSrc = buffer.get();
+        bPktId = buffer.getLong();
+        wLen = buffer.getInt();
+
+        wCrc16_1 = buffer.getShort();
+
+        final short crc1Evaluated = Crc_16.evaluateCrc(encodedPacket, 0, 14);
+
+
         bMsq = new Message();
-        bMsq.setCType(byteBuffer.getInt());
-        bMsq.setBUserId(byteBuffer.getInt());
+        bMsq.setCType(buffer.getInt());
+        bMsq.setBUserId(buffer.getInt());
 
-        //msg body
-        byte[] messageBody = new byte[wLength];
-        byteBuffer.get(messageBody);
+        byte[] messageBody = new byte[wLen - 8];
+        buffer.get(messageBody);
 
-        bMsq.setMessage(new String(messageBody));
-        bMsq.decode();//decode
 
-        wCRC16_2 = byteBuffer.getShort();
+        wCrc16_2 = buffer.getShort();
+
+        bMsq.setEncryptedMessageInBytes(messageBody);
+        bMsq.decode();
+
+        byte[] messageToEvaluate = new byte[wLen];
+        System.arraycopy(encodedPacket, 16, messageToEvaluate, 0, wLen);
+
+        final short crc2Evaluated = Crc_16.evaluateCrc(messageToEvaluate, 0, wLen);
+
     }
 
 
@@ -59,32 +92,30 @@ public class Packet {
 
         Message message = getBMsq();
 
-        message.encode();
 
-        int BgngLength = Byte.BYTES + Byte.BYTES + Long.BYTES + Integer.BYTES;//first length
-
-        byte[] Bgng = ByteBuffer.allocate(BgngLength)
-                .put(bMagic)
-                .put(bSource)
-                .putLong(bPaketID)
-                .putInt(wLength)
+        byte[] packetPartFirst = ByteBuffer.allocate(packetPartFirstLength)
+                .put(B_MAGIC)
+                .put(bSrc)
+                .putLong(bPktId.longValue())
+                .putInt(wLen)
                 .array();
 
-        wCRC16_1 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Bgng);//16-1
 
-        int ScndLength = message.getMessageBytesLength();//second length
+        wCrc16_1 = Crc_16.evaluateCrc(packetPartFirst, 0, 14);
 
-        byte[] Scnd = ByteBuffer.allocate(ScndLength)
+
+        Integer packetPartSecondLength = message.fullMessageBytesLength();
+
+        byte[] packetPartSecond = ByteBuffer.allocate(packetPartSecondLength)
                 .put(message.toPacketPart())
                 .array();
 
-        wCRC16_2 = (short) CRC.calculateCRC(CRC.Parameters.CRC16, Scnd);//16-2
 
-        int packetLength = BgngLength + Short.BYTES + ScndLength + Short.BYTES;
-//finally, returning
-        return ByteBuffer.allocate(packetLength).put(Bgng).putShort(wCRC16_1).put(Scnd).putShort(wCRC16_2).array();
+        wCrc16_2 = Crc_16.evaluateCrc(packetPartSecond, 0, packetPartSecond.length);
+
+
+        Integer packetLength = packetPartFirstLength + wCrc16_1.BYTES + packetPartSecondLength + wCrc16_2.BYTES;
+
+        return ByteBuffer.allocate(packetLength).put(packetPartFirst).putShort(wCrc16_1).put(packetPartSecond).putShort(wCrc16_2).array();
     }
-
-
-
 }

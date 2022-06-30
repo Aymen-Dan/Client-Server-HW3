@@ -1,16 +1,27 @@
 package org.example;
 
-import Processing.Processor;
-import Processing.UsableNetwork;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import Processing.StoreClientTCP;
+import Processing.StoreServerTCP;
 
 public class Main {
     public static void main(String[] args) {
+        //clients
+        StoreClientTCP client1 = new StoreClientTCP();
+        client1.run();
 
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
+      /*  StoreClientTCP client2 = new StoreClientTCP();
+        client2.run();
+
+        StoreClientTCP client3 = new StoreClientTCP();
+        client3.run();*/
+
+        //server
+        StoreServerTCP srv = new StoreServerTCP();
+        srv.run();
+
+
+        //previous main
+       /* ExecutorService executorService = Executors.newFixedThreadPool(4);
         //for 20
         for(int i = 0; i < 20; i++)
             executorService.submit(()->{
@@ -28,6 +39,6 @@ public class Main {
 
            e.printStackTrace();
         }
-        Processor.shutdown();
+        Processor.shutdown();*/
     }
 }

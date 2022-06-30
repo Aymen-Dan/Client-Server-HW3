@@ -2,7 +2,6 @@ package Processing;
 
 
 import Technical.Message;
-import Technical.Packet;
 
 /** packs the already encoded answer to the client*/
 public class Sender {

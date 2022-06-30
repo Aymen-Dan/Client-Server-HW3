@@ -1,55 +1,103 @@
 package Technical;
 
+
 import lombok.Data;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 @Data
 public class Message {
 
-    Integer bUserId;
-    Integer cType;
-
     String message;
 
-    public static final int nonMessage_bytes = 8;
+    Integer cType;
+    Integer bUserId;
 
-    public Message() {}
 
-    public Message( Integer bUserId, Integer cType, String message) {
-        this.cType = cType;
-        this.bUserId = bUserId;
-        this.message = message;
-    }
-
-    public byte[] toPacketPart() {
-        return ByteBuffer.allocate(getMessageBytesLength())
-                .putInt(cType)
-                .putInt(bUserId)
-                .put(message.getBytes()).array();
-    }
-
-    public int getMessageBytesLength() {
-        return nonMessage_bytes + getMessageBytes();
-    }
-
-    public Integer getMessageBytes() {
-        return message.length();
-    }
-
-    public Integer getBUserId() {
-        return bUserId;
-    }
-
-    public Integer getCType() {
-        return cType;
+    public enum cTypes {
+        GET_PRODUCT_AMOUNT,
+        SET_PRODUCT_AMOUNT,
+        SET_PRODUCT_DESCRIPTION,
+        GET_PRODUCT_DESCRIPTION,
+        SET_PRODUCT_PRICE,
+        GET_PRODUCT_PRICE,
+        GET_PRODUCT,
+        ADD_PRODUCT,
+        ADD_PRODUCT_GROUP,
+        ADD_PRODUCT_TO_GROUP,
+        EXCEPTION_FROM_SERVER,
+        RESPONSE
     }
 
 
-    public void encode() {
-        message = Cypher.encode(message);
-    }
-    public void decode() {
-        message = Cypher.decode(message);
+        private byte[] encryptedMessageInBytes;
+        public static final int BYTES_WITHOUT_MESSAGE = Integer.BYTES + Integer.BYTES;
+
+
+        public byte[] getEncryptedMessageInBytes() {
+            return encryptedMessageInBytes;
+        }
+        public void setEncryptedMessageInBytes(byte[] encryptedMessageInBytes) {
+            this.encryptedMessageInBytes = encryptedMessageInBytes;
+        }
+
+        public void setCType(int cType) {
+            this.cType = cType;
+        }
+        public int getCType() {
+            return cType;
+        }
+
+        public void setBUserId(int bUserId) {
+            this.bUserId = bUserId;
+        }
+        public int getBUserId() {
+            return bUserId;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+
+        public Message() { }
+
+        public Message(cTypes cType, Integer bUserId, String message) throws BadPaddingException, IllegalBlockSizeException {
+            this.cType = cType.ordinal();
+            this.bUserId = bUserId;
+            this.message = message;
+            encode();
+        }
+
+
+        public byte[] toPacketPart() {
+            return ByteBuffer.allocate(fullMessageBytesLength())
+                    .putInt(cType)
+                    .putInt(bUserId)
+                    .put(encryptedMessageInBytes).array();
+        }
+
+
+
+        public int fullMessageBytesLength() {return encryptedMessageInBytes.length + BYTES_WITHOUT_MESSAGE; }
+        public int messageBytesLength() {return encryptedMessageInBytes.length; }
+
+
+        public void encode() throws BadPaddingException, IllegalBlockSizeException {
+
+            byte[] myMes = message.getBytes(StandardCharsets.UTF_8);
+            encryptedMessageInBytes = Cryptor.encryptMessage(myMes);
+        }
+
+        public void decode() throws BadPaddingException, IllegalBlockSizeException{
+
+            byte[] decryptedMessage = Cryptor.decryptMessage(encryptedMessageInBytes);
+            message = new String(decryptedMessage);
+        }
+
     }
 
-}
+

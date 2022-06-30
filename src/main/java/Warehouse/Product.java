@@ -44,4 +44,6 @@ public class Product {
     public void addAmount(int amount) {
         this.amount += amount;
     }
+
+    public void removeAmount(int amount) {this.amount -= amount;}
 }
